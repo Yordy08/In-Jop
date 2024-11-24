@@ -67,11 +67,13 @@
     const previsualizacion = document.getElementById("previsualizacion");
     const totalLabel = document.getElementById("total");
 
+    // Función para agregar productos
     document.querySelectorAll(".producto-btn").forEach(button => {
       button.addEventListener("click", () => {
         const producto = button.dataset.producto;
         const precio = parseInt(button.dataset.precio);
 
+        // Si no está en el carrito, lo agregamos
         if (!productosSeleccionados[producto]) {
           productosSeleccionados[producto] = { cantidad: 0, precio: precio };
         }
@@ -81,26 +83,48 @@
       });
     });
 
+    // Función para actualizar la previsualización
     function actualizarPrevisualizacion() {
       previsualizacion.innerHTML = "";
       let total = 0;
 
+      // Iteramos sobre los productos seleccionados
       Object.entries(productosSeleccionados).forEach(([producto, info]) => {
         const subTotal = info.cantidad * info.precio;
         total += subTotal;
 
+        // Crear el elemento de la lista
         const item = document.createElement("li");
         item.classList.add("list-group-item");
-        item.textContent = `${producto} - Cantidad: ${info.cantidad} - Subtotal: $${subTotal.toLocaleString("es-CO")}`;
+
+        // Mostrar el nombre del producto, cantidad y subtotales
+        item.innerHTML = `${producto} - Cantidad: ${info.cantidad} - Subtotal: $${subTotal.toLocaleString("es-CO")} 
+                          <button class="btn btn-danger btn-sm float-end eliminar-btn" data-producto="${producto}">Eliminar</button>`;
         previsualizacion.appendChild(item);
       });
 
+      // Actualizar el total
       totalLabel.textContent = total.toLocaleString("es-CO");
 
+      // Actualizar los campos ocultos con los productos seleccionados y el total
       document.getElementById("productosSeleccionados").value = JSON.stringify(productosSeleccionados);
       document.getElementById("precioTotal").value = total;
     }
 
+    // Función para eliminar un producto de la previsualización
+    previsualizacion.addEventListener("click", (event) => {
+      if (event.target && event.target.classList.contains("eliminar-btn")) {
+        const producto = event.target.dataset.producto;
+
+        // Eliminar el producto del carrito
+        delete productosSeleccionados[producto];
+
+        // Actualizar la previsualización
+        actualizarPrevisualizacion();
+      }
+    });
+
+    // Función para enviar el formulario
     document.getElementById("saleForm").addEventListener("submit", (event) => {
       event.preventDefault();
 
